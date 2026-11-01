@@ -1,4 +1,10 @@
-function AccountStatus({ loggedInAccount, onLogout }) {
+import { useContext } from "react";
+import { BankActionsContext, BankDataContext } from "../context/BankContext";
+
+function AccountStatus() {
+  const { loggedInAccount } = useContext(BankDataContext);
+  const { logout } = useContext(BankActionsContext);
+
   if (!loggedInAccount) {
     return (
       <div>
@@ -16,7 +22,7 @@ function AccountStatus({ loggedInAccount, onLogout }) {
         <p>Owner ID: {loggedInAccount.ownerID}</p>
         <p>Balance: {loggedInAccount.balance}</p>
 
-        <button onClick={onLogout}>Logout</button>
+        <button onClick={logout}>Logout</button>
       </div>
     </>
   );
