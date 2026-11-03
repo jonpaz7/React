@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { BankActionsContext, BankDataContext } from "../context/BankContext";
 
 function AccountStatus() {
-  const { loggedInAccount } = useContext(BankDataContext);
+  const { loggedInAccountNumber } = useContext(BankDataContext);
   const { logout } = useContext(BankActionsContext);
 
   if (!loggedInAccount) {

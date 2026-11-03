@@ -22,7 +22,6 @@ function CreatingAccount() {
   return (
     <>
       <h3>Creating New Account</h3>
-
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -35,7 +34,7 @@ function CreatingAccount() {
           name="ownerName"
           placeholder="Israel Israeli"
           value={formData.ownerName}
-          onChange={() => handleChange(event)}
+          onChange={(event) => handleChange(event)}
         />
         <input
           type="number"
@@ -43,7 +42,7 @@ function CreatingAccount() {
           name="ownerID"
           placeholder="123456789"
           value={formData.ownerID}
-          onChange={() => handleChange(event)}
+          onChange={(event) => handleChange(event)}
         />
         <input
           type="password"
@@ -51,7 +50,7 @@ function CreatingAccount() {
           name="ownerPassword"
           placeholder="Up123456"
           value={formData.ownerPassword}
-          onChange={() => handleChange(event)}
+          onChange={(event) => handleChange(event)}
         />
         <button type="submit">Create account</button>
       </form>

@@ -4,30 +4,45 @@ import { BankActionsContext } from "../context/BankContext";
 function LoginAccountScreen() {
   const { loginAccount } = useContext(BankActionsContext);
 
-  const [ownerIDLogin, setOwnerIDLogin] = useState("");
-  const [ownerPasswordLogin, setOwnerPasswordLogin] = useState("");
+  const [formData, setFormData] = useState({
+    ownerID: "",
+    ownerPassword: "",
+  });
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((p) => ({
+      ...p,
+      [name]: value,
+    }));
+  };
   return (
     <>
       <h3>Login to Existing Account</h3>
-      <input
-        type="number"
-        placeholder="Owner ID Number"
-        value={ownerIDLogin}
-        onChange={(e) => setOwnerIDLogin(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Owner Password"
-        value={ownerPasswordLogin}
-        onChange={(e) => setOwnerPasswordLogin(e.target.value)}
-      />
-      <button
-        onClick={() => {
-          loginAccount(ownerIDLogin, ownerPasswordLogin);
+
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          loginAccount(formData);
         }}
       >
-        Login
-      </button>
+        <input
+          type="number"
+          name="ownerID"
+          placeholder="325893014"
+          value={formData.ownerID}
+          onChange={(event) => handleChange(event)}
+        />
+        <input
+          type="password"
+          name="ownerPassword"
+          placeholder="Owner Password"
+          value={formData.ownerPassword}
+          onChange={(event) => handleChange(event)}
+        />
+        <button type="submit">Login</button>
+      </form>
     </>
   );
 }

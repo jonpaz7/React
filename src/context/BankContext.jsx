@@ -6,8 +6,7 @@ function BankProvider({ children }) {
 
   const [accounts, setAccounts] = useState(() => loadAccounts());
 
-  const [loggedInAccount, setLoggedInAccount] = useState(null);
-
+  let loggedInAccountNumber = null;
   //================================ Functions =====================================//
 
   function loadAccounts() {
@@ -20,7 +19,7 @@ function BankProvider({ children }) {
     localStorage.setItem("bankAccounts", JSON.stringify(accounts));
   };
   const logout = () => {
-    setLoggedInAccount(null);
+    loggedInAccountNumber = null;
   };
 
   const createAccount = (formData) => {
@@ -53,7 +52,9 @@ function BankProvider({ children }) {
     saveAccountsToLocalStorage();
   };
 
-  const loginAccount = (ownerID, ownerPassword) => {
+  const loginAccount = (formData) => {
+    const { ownerID, ownerPassword } = formData;
+
     if (!ownerID || !ownerPassword) {
       alert("Missing details");
       return;
@@ -67,7 +68,7 @@ function BankProvider({ children }) {
     }
 
     if (selectedAccount.ownerPassword === ownerPassword) {
-      setLoggedInAccount(selectedAccount);
+      loggedInAccountNumber = selectedAccount.accountNumber;
 
       alert("Successfully Login");
     } else {
@@ -75,6 +76,34 @@ function BankProvider({ children }) {
     }
   };
 
+  const loggedInCheck = () => {
+    if (!loggedInAccountNumber) {
+      alert("You are not logged in");
+      return false;
+    }
+    return true;
+  };
+
+  const depositMoney = (formData) => {
+    const { amountToDeposit } = formData;
+    amountToDeposit = Number(amountToDeposit);
+    if (isNaN(amountToDeposit)) return;
+
+    setAccounts((prevAccounts) => {
+      return prevAccounts.map((acc) => {
+        if (acc.accountNumber === loggedInAccountNumber) {
+          return {
+            ...acc,
+            balance: acc.balance + amountToDeposit,
+            history: [...acc.history, `Deposited ${amountToDeposit} NIS`],
+          };
+        }
+        return acc;
+      });
+    });
+
+    saveToLocalStorage();
+  };
   //================================ Configuration =====================================//
 
   const BankActions = {
@@ -83,11 +112,15 @@ function BankProvider({ children }) {
     logout,
     createAccount,
     loginAccount,
+    loggedInCheck,
+    depositMoney,
   };
 
   return (
     <BankActionsContext.Provider value={BankActions}>
-      <BankDataContext.Provider value={{ accounts, loggedInAccount }}>
+      <BankDataContext.Provider
+        value={{ accounts, loggedInAccount: loggedInAccountNumber }}
+      >
         {children}
       </BankDataContext.Provider>
     </BankActionsContext.Provider>
