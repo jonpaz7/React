@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { getRandomAccountNumber } from "../utils/numericUtils.js";
 
 function BankProvider({ children }) {
@@ -6,7 +6,7 @@ function BankProvider({ children }) {
 
   const [accounts, setAccounts] = useState(() => loadAccounts());
 
-  let loggedInAccountNumber = null;
+  let [loggedInAccountNumber, setLoggedInAccountNumber] = useState(null);
   //================================ Functions =====================================//
 
   function loadAccounts() {
@@ -15,11 +15,19 @@ function BankProvider({ children }) {
     return savedAccounts ? JSON.parse(savedAccounts) : [];
   }
 
-  const saveAccountsToLocalStorage = () => {
+  useEffect(() => {
     localStorage.setItem("bankAccounts", JSON.stringify(accounts));
-  };
+  }, [accounts]);
+
   const logout = () => {
-    loggedInAccountNumber = null;
+    setLoggedInAccountNumber(null);
+  };
+
+  const getLoggedInAccount = () => {
+    const found = accounts.find(
+      (acc) => acc.accountNumber == loggedInAccountNumber,
+    );
+    return found;
   };
 
   const createAccount = (formData) => {
@@ -68,7 +76,7 @@ function BankProvider({ children }) {
     }
 
     if (selectedAccount.ownerPassword === ownerPassword) {
-      loggedInAccountNumber = selectedAccount.accountNumber;
+      setLoggedInAccountNumber(selectedAccount.accountNumber);
 
       alert("Successfully Login");
     } else {
@@ -85,9 +93,9 @@ function BankProvider({ children }) {
   };
 
   const depositMoney = (formData) => {
-    const { amountToDeposit } = formData;
+    let { amountToDeposit } = formData;
     amountToDeposit = Number(amountToDeposit);
-    if (isNaN(amountToDeposit)) return;
+    if (isNaN(amountToDeposit) || amountToDeposit <= 0) return;
 
     setAccounts((prevAccounts) => {
       return prevAccounts.map((acc) => {
@@ -101,26 +109,49 @@ function BankProvider({ children }) {
         return acc;
       });
     });
-
-    saveToLocalStorage();
   };
+
+  const withdrawMoney = (formData) => {
+    let { amountToWithdraw } = formData;
+    amountToWithdraw = Number(amountToWithdraw);
+
+    if (isNaN(amountToWithdraw) || amountToWithdraw <= 0) return;
+
+    setAccounts((prevAccounts) => {
+      return prevAccounts.map((acc) => {
+        if (acc.accountNumber === loggedInAccountNumber) {
+          if (acc.balance < amountToWithdraw) {
+            alert("You dont have enough money in your account");
+            return acc;
+          } else {
+            acc = {
+              ...acc,
+              balance: acc.balance - amountToWithdraw,
+              history: [...acc.history, `Withdrawn ${amountToWithdraw} NIS`],
+            };
+          }
+        }
+        return acc;
+      });
+    });
+  };
+
   //================================ Configuration =====================================//
 
   const BankActions = {
     loadAccounts,
-    saveAccountsToLocalStorage,
     logout,
     createAccount,
     loginAccount,
     loggedInCheck,
     depositMoney,
+    withdrawMoney,
+    getLoggedInAccount,
   };
 
   return (
     <BankActionsContext.Provider value={BankActions}>
-      <BankDataContext.Provider
-        value={{ accounts, loggedInAccount: loggedInAccountNumber }}
-      >
+      <BankDataContext.Provider value={{ accounts, loggedInAccountNumber }}>
         {children}
       </BankDataContext.Provider>
     </BankActionsContext.Provider>

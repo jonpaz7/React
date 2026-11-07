@@ -1,9 +1,16 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { BankActionsContext, BankDataContext } from "../context/BankContext";
 
 function AccountStatus() {
-  const { loggedInAccountNumber } = useContext(BankDataContext);
-  const { logout } = useContext(BankActionsContext);
+  const { getLoggedInAccount, logout } = useContext(BankActionsContext);
+  const { loggedInAccountNumber, accounts } = useContext(BankDataContext);
+  let [loggedInAccount, setLoggedInAccount] = useState(null);
+
+  useEffect(() => {
+    if (loggedInAccountNumber || accounts) {
+      setLoggedInAccount(getLoggedInAccount());
+    }
+  }, [loggedInAccountNumber, accounts]);
 
   if (!loggedInAccount) {
     return (
