@@ -23,6 +23,7 @@ function DepositMoneyForm({ closeForm }) {
         onSubmit={(event) => {
           event.preventDefault();
           depositMoney(formData);
+          closeForm();
         }}
       >
         <h1>deposit</h1>

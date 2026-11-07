@@ -23,6 +23,7 @@ function WithrawMoneyForm({ closeForm }) {
         onSubmit={(event) => {
           event.preventDefault();
           withdrawMoney(formData);
+          closeForm();
         }}
       >
         <h1>Withraw</h1>

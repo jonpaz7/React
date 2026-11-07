@@ -25,6 +25,7 @@ function AccountStatus() {
       <div>
         <h2>Logged In</h2>
 
+        <p>Account Number: {loggedInAccount.accountNumber}</p>
         <p>Owner Name: {loggedInAccount.ownerName}</p>
         <p>Owner ID: {loggedInAccount.ownerID}</p>
         <p>Balance: {loggedInAccount.balance}</p>

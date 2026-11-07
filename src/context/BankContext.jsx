@@ -12,7 +12,9 @@ function BankProvider({ children }) {
   function loadAccounts() {
     const savedAccounts = localStorage.getItem("bankAccounts");
 
-    return savedAccounts ? JSON.parse(savedAccounts) : [];
+    return savedAccounts && savedAccounts !== "undefined"
+      ? JSON.parse(savedAccounts)
+      : [];
   }
 
   useEffect(() => {
@@ -56,8 +58,6 @@ function BankProvider({ children }) {
     };
 
     setAccounts([...accounts, newAccount]);
-
-    saveAccountsToLocalStorage();
   };
 
   const loginAccount = (formData) => {
@@ -86,7 +86,6 @@ function BankProvider({ children }) {
 
   const loggedInCheck = () => {
     if (!loggedInAccountNumber) {
-      alert("You are not logged in");
       return false;
     }
     return true;
@@ -136,6 +135,84 @@ function BankProvider({ children }) {
     });
   };
 
+  const transferMoney = (formData) => {
+    let { amountToTransfer, targetAccountNumber } = formData;
+
+    amountToTransfer = Number(amountToTransfer);
+    targetAccountNumber = Number(targetAccountNumber);
+    if (isNaN(amountToTransfer) || isNaN(targetAccountNumber)) return;
+
+    if (!accounts.find((acc) => acc.accountNumber === targetAccountNumber)) {
+      alert("couldnt find the target account");
+      return;
+    } else if (targetAccountNumber === loggedInAccountNumber) {
+      alert("hey man u cant transfer money to ur self");
+      return;
+    } else if (
+      accounts.find((acc) => acc.accountNumber === loggedInAccountNumber)
+        .balance < amountToTransfer
+    ) {
+      alert("not enough money sir!");
+      return;
+    }
+
+    setAccounts((prevAccounts) => {
+      return prevAccounts.map((acc) => {
+        if (acc.accountNumber === loggedInAccountNumber) {
+          return {
+            ...acc,
+            balance: acc.balance - amountToTransfer,
+            history: [
+              ...acc.history,
+              `${amountToTransfer} NIS tranferred to account number: ${targetAccountNumber}`,
+            ],
+          };
+        }
+
+        if (acc.accountNumber === targetAccountNumber) {
+          return {
+            ...acc,
+            balance: acc.balance + amountToTransfer,
+            history: [
+              ...acc.history,
+              `${amountToTransfer} NIS recivied from account number: ${loggedInAccountNumber}`,
+            ],
+          };
+        }
+
+        return acc;
+      });
+    });
+  };
+
+  const deleteAccount = (accountNumberToDelete) => {
+    setAccounts((prevAccounts) => {
+      return prevAccounts.filter(
+        (acc) => acc.accountNumber != accountNumberToDelete,
+      );
+    });
+  };
+
+  const showDetails = (accountNumberToBeShown) => {
+    const accountToBeShown = accounts.find(
+      (acc) => acc.accountNumber === accountNumberToBeShown,
+    );
+
+    let historyTextList = "";
+    accountToBeShown.history.forEach((element) => {
+      historyTextList += `${element} \n`;
+    });
+
+    alert(`
+    Account: ${accountToBeShown.accountNumber}
+    Owner: ${accountToBeShown.ownerName} 
+    Balance: ${accountToBeShown.balance}
+    
+    History: ${historyTextList}
+
+      `);
+  };
+
   //================================ Configuration =====================================//
 
   const BankActions = {
@@ -147,6 +224,9 @@ function BankProvider({ children }) {
     depositMoney,
     withdrawMoney,
     getLoggedInAccount,
+    transferMoney,
+    deleteAccount,
+    showDetails,
   };
 
   return (
