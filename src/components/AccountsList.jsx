@@ -1,5 +1,6 @@
 import { useContext, useState } from "react";
 import { BankDataContext, BankActionsContext } from "../context/BankContext";
+import PrintAsPDF from "./buttonComponents.jsx/PrintAsPDF";
 
 function AccountsList() {
   const { accounts } = useContext(BankDataContext);
@@ -7,7 +8,7 @@ function AccountsList() {
 
   const [showList, setShowList] = useState(true);
   const [ownerNameSearchTerm, setOwnerNameSearchTerm] = useState("");
-  const [balanceSearchTerm, setBalanceSearchTerm] = useState(null);
+  const [balanceSearchTerm, setBalanceSearchTerm] = useState("undefined");
 
   return (
     <>
@@ -41,7 +42,7 @@ function AccountsList() {
       {showList &&
         accounts
           .filter((acc) => {
-            if (ownerNameSearchTerm === "" && balanceSearchTerm === null)
+            if (ownerNameSearchTerm === "" && balanceSearchTerm === "undefined")
               return true;
 
             return (
@@ -63,7 +64,7 @@ function AccountsList() {
                 <button onClick={() => showDetails(acc.accountNumber)}>
                   Details
                 </button>
-                <button>Print details as PDF</button>
+                <PrintAsPDF PDFData={acc.history} />
               </div>
             );
           })}

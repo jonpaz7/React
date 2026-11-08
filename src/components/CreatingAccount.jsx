@@ -8,14 +8,15 @@ function CreatingAccount() {
     ownerName: "",
     ownerID: "",
     ownerPassword: "",
+    isAdmin: false,
   });
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const { type, name, value, checked } = event.target;
 
     setFormData((p) => ({
       ...p,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -50,6 +51,15 @@ function CreatingAccount() {
           name="ownerPassword"
           placeholder="Up123456"
           value={formData.ownerPassword}
+          onChange={(event) => handleChange(event)}
+        />
+        <br />
+        <label htmlFor="createAdmin">Admin</label>
+        <input
+          type="checkbox"
+          id="createAdmin"
+          name="isAdmin"
+          checked={formData.isAdmin}
           onChange={(event) => handleChange(event)}
         />
         <button type="submit">Create account</button>

@@ -13,17 +13,16 @@ function AccountStatus() {
   }, [loggedInAccountNumber, accounts]);
 
   if (!loggedInAccount) {
-    return (
-      <div>
-        <h2>Not Logged In</h2>
-      </div>
-    );
+    return;
   }
 
   return (
     <>
       <div>
-        <h2>Logged In</h2>
+        <h2>
+          hello {loggedInAccount.isAdmin === true && <strong>Manager</strong>}{" "}
+          {loggedInAccount.ownerName}{" "}
+        </h2>
 
         <p>Account Number: {loggedInAccount.accountNumber}</p>
         <p>Owner Name: {loggedInAccount.ownerName}</p>

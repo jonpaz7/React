@@ -6,7 +6,8 @@ function BankProvider({ children }) {
 
   const [accounts, setAccounts] = useState(() => loadAccounts());
 
-  let [loggedInAccountNumber, setLoggedInAccountNumber] = useState(null);
+  const [loggedInAccountNumber, setLoggedInAccountNumber] = useState(null);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   //================================ Functions =====================================//
 
   function loadAccounts() {
@@ -21,6 +22,18 @@ function BankProvider({ children }) {
     localStorage.setItem("bankAccounts", JSON.stringify(accounts));
   }, [accounts]);
 
+  useEffect(() => {
+    if (
+      loggedInAccountNumber &&
+      accounts.find((acc) => acc.accountNumber === loggedInAccountNumber)
+        .isAdmin === true
+    ) {
+      setIsAdminLoggedIn(true);
+    } else {
+      setIsAdminLoggedIn(false);
+    }
+  }, [loggedInAccountNumber]);
+
   const logout = () => {
     setLoggedInAccountNumber(null);
   };
@@ -33,7 +46,7 @@ function BankProvider({ children }) {
   };
 
   const createAccount = (formData) => {
-    const { ownerName, ownerID, ownerPassword } = formData;
+    const { ownerName, ownerID, ownerPassword, isAdmin } = formData;
 
     //check for missing details
     if (!ownerName || !ownerID || !ownerPassword) {
@@ -55,6 +68,8 @@ function BankProvider({ children }) {
       ownerPassword: ownerPassword,
       balance: 0,
       history: ["Account Created"],
+      isAdmin: isAdmin,
+      chatHistory: [],
     };
 
     setAccounts([...accounts, newAccount]);
@@ -213,6 +228,24 @@ function BankProvider({ children }) {
       `);
   };
 
+  const sendMessage = (text) => {
+    setAccounts((prevAccounts) => {
+      return prevAccounts.map((acc) => {
+        if (acc.accountNumber === loggedInAccountNumber) {
+          return (acc = {
+            ...acc,
+
+            chatHistory: [
+              ...acc.chatHistory,
+              { senderAccount: acc.accountNumber, text: text },
+            ],
+          });
+        }
+        return acc;
+      });
+    });
+  };
+
   //================================ Configuration =====================================//
 
   const BankActions = {
@@ -227,11 +260,14 @@ function BankProvider({ children }) {
     transferMoney,
     deleteAccount,
     showDetails,
+    sendMessage,
   };
 
   return (
     <BankActionsContext.Provider value={BankActions}>
-      <BankDataContext.Provider value={{ accounts, loggedInAccountNumber }}>
+      <BankDataContext.Provider
+        value={{ accounts, loggedInAccountNumber, isAdminLoggedIn }}
+      >
         {children}
       </BankDataContext.Provider>
     </BankActionsContext.Provider>
