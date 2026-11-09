@@ -237,7 +237,10 @@ function BankProvider({ children }) {
 
             chatHistory: [
               ...acc.chatHistory,
-              { senderAccount: acc.accountNumber, text: text },
+              {
+                senderAccount: isAdminLoggedIn ? "admin" : acc.accountNumber,
+                text: text,
+              },
             ],
           });
         }
