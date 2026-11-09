@@ -38,10 +38,8 @@ function BankProvider({ children }) {
     setLoggedInAccountNumber(null);
   };
 
-  const getLoggedInAccount = () => {
-    const found = accounts.find(
-      (acc) => acc.accountNumber == loggedInAccountNumber,
-    );
+  const getAccountObject = (accountNumber) => {
+    const found = accounts.find((acc) => acc.accountNumber === accountNumber);
     return found;
   };
 
@@ -228,10 +226,10 @@ function BankProvider({ children }) {
       `);
   };
 
-  const sendMessage = (text) => {
+  const sendMessage = (text, senderAccountNumber) => {
     setAccounts((prevAccounts) => {
       return prevAccounts.map((acc) => {
-        if (acc.accountNumber === loggedInAccountNumber) {
+        if (acc.accountNumber === senderAccountNumber) {
           return (acc = {
             ...acc,
 
@@ -259,7 +257,7 @@ function BankProvider({ children }) {
     loggedInCheck,
     depositMoney,
     withdrawMoney,
-    getLoggedInAccount,
+    getAccountObject,
     transferMoney,
     deleteAccount,
     showDetails,

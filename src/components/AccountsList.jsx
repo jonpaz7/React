@@ -8,7 +8,7 @@ function AccountsList() {
 
   const [showList, setShowList] = useState(true);
   const [ownerNameSearchTerm, setOwnerNameSearchTerm] = useState("");
-  const [balanceSearchTerm, setBalanceSearchTerm] = useState("undefined");
+  const [balanceSearchTerm, setBalanceSearchTerm] = useState("");
 
   return (
     <>
@@ -42,7 +42,7 @@ function AccountsList() {
       {showList &&
         accounts
           .filter((acc) => {
-            if (ownerNameSearchTerm === "" && balanceSearchTerm === "undefined")
+            if (ownerNameSearchTerm === "" && balanceSearchTerm === "")
               return true;
 
             return (

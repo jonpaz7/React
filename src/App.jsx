@@ -16,7 +16,7 @@ function App() {
     <>
       <Header />
       <AccountStatus />
-      <Chat />
+      {loggedInAccountNumber && <Chat />}
       <CreatingAccount />
       <LoginAccountScreen />
       {loggedInAccountNumber && <ActionsArea />}
