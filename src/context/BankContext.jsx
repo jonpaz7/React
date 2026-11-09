@@ -32,7 +32,9 @@ function BankProvider({ children }) {
       return;
     }
 
-    const selectedAccount = accounts.find((x) => String(x.ownerID) === String(ownerID));
+    const selectedAccount = accounts.find(
+      (x) => String(x.ownerID) === String(ownerID),
+    );
 
     if (selectedAccount) {
       alert("there is already account with this ID");
@@ -61,7 +63,9 @@ function BankProvider({ children }) {
       return;
     }
 
-    const selectedAccount = accounts.find((x) => String(x.ownerID) === String(ownerID));
+    const selectedAccount = accounts.find(
+      (x) => String(x.ownerID) === String(ownerID),
+    );
 
     if (!selectedAccount) {
       alert("No such Account");
@@ -70,7 +74,6 @@ function BankProvider({ children }) {
 
     if (selectedAccount.ownerPassword === ownerPassword) {
       setLoggedInAccountNumber(selectedAccount.accountNumber);
-      alert("Successfully Login");
     } else {
       alert("Check your Password");
     }
@@ -125,7 +128,12 @@ function BankProvider({ children }) {
 
     amountToTransfer = Number(amountToTransfer);
     targetAccountNumber = Number(targetAccountNumber);
-    if (isNaN(amountToTransfer) || isNaN(targetAccountNumber) || amountToTransfer <= 0) return;
+    if (
+      isNaN(amountToTransfer) ||
+      isNaN(targetAccountNumber) ||
+      amountToTransfer <= 0
+    )
+      return;
 
     if (!accounts.find((acc) => acc.accountNumber === targetAccountNumber)) {
       alert("couldnt find the target account");
@@ -134,7 +142,8 @@ function BankProvider({ children }) {
       alert("hey man u cant transfer money to ur self");
       return;
     } else if (
-      accounts.find((acc) => acc.accountNumber === loggedInAccountNumber).balance < amountToTransfer
+      accounts.find((acc) => acc.accountNumber === loggedInAccountNumber)
+        .balance < amountToTransfer
     ) {
       alert("not enough money sir!");
       return;
@@ -172,14 +181,14 @@ function BankProvider({ children }) {
   const deleteAccount = (accountNumberToDelete) => {
     setAccounts((prevAccounts) => {
       return prevAccounts.filter(
-        (acc) => acc.accountNumber !== accountNumberToDelete
+        (acc) => acc.accountNumber !== accountNumberToDelete,
       );
     });
   };
 
   const showDetails = (accountNumberToBeShown) => {
     const accountToBeShown = accounts.find(
-      (acc) => acc.accountNumber === accountNumberToBeShown
+      (acc) => acc.accountNumber === accountNumberToBeShown,
     );
 
     let historyTextList = "";
