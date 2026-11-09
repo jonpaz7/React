@@ -32,7 +32,9 @@ function BankProvider({ children }) {
       return;
     }
 
-    const selectedAccount = accounts.find((x) => String(x.ownerID) === String(ownerID));
+    const selectedAccount = accounts.find(
+      (x) => String(x.ownerID) === String(ownerID),
+    );
 
     if (selectedAccount) {
       alert("there is already account with this ID");
@@ -48,6 +50,7 @@ function BankProvider({ children }) {
       history: ["Account Created"],
       isAdmin: isAdmin,
       chatHistory: [],
+      loans: [],
     };
 
     setAccounts([...accounts, newAccount]);
@@ -61,7 +64,9 @@ function BankProvider({ children }) {
       return;
     }
 
-    const selectedAccount = accounts.find((x) => String(x.ownerID) === String(ownerID));
+    const selectedAccount = accounts.find(
+      (x) => String(x.ownerID) === String(ownerID),
+    );
 
     if (!selectedAccount) {
       alert("No such Account");
@@ -125,7 +130,12 @@ function BankProvider({ children }) {
 
     amountToTransfer = Number(amountToTransfer);
     targetAccountNumber = Number(targetAccountNumber);
-    if (isNaN(amountToTransfer) || isNaN(targetAccountNumber) || amountToTransfer <= 0) return;
+    if (
+      isNaN(amountToTransfer) ||
+      isNaN(targetAccountNumber) ||
+      amountToTransfer <= 0
+    )
+      return;
 
     if (!accounts.find((acc) => acc.accountNumber === targetAccountNumber)) {
       alert("couldnt find the target account");
@@ -134,7 +144,8 @@ function BankProvider({ children }) {
       alert("hey man u cant transfer money to ur self");
       return;
     } else if (
-      accounts.find((acc) => acc.accountNumber === loggedInAccountNumber).balance < amountToTransfer
+      accounts.find((acc) => acc.accountNumber === loggedInAccountNumber)
+        .balance < amountToTransfer
     ) {
       alert("not enough money sir!");
       return;
@@ -172,14 +183,14 @@ function BankProvider({ children }) {
   const deleteAccount = (accountNumberToDelete) => {
     setAccounts((prevAccounts) => {
       return prevAccounts.filter(
-        (acc) => acc.accountNumber !== accountNumberToDelete
+        (acc) => acc.accountNumber !== accountNumberToDelete,
       );
     });
   };
 
   const showDetails = (accountNumberToBeShown) => {
     const accountToBeShown = accounts.find(
-      (acc) => acc.accountNumber === accountNumberToBeShown
+      (acc) => acc.accountNumber === accountNumberToBeShown,
     );
 
     let historyTextList = "";
@@ -196,8 +207,8 @@ function BankProvider({ children }) {
     `);
   };
 
-  const sendMessage = (text, targetAccountNumber) => {
-    if (!text || !text.trim()) return;
+  const sendMessage = (text, targetAccountNumber, messageType, loanAmount) => {
+    if (messageType === "message" && (!text || !text.trim())) return;
 
     setAccounts((prevAccounts) => {
       return prevAccounts.map((acc) => {
@@ -207,9 +218,48 @@ function BankProvider({ children }) {
             chatHistory: [
               ...acc.chatHistory,
               {
-                msgID: Date.now() + Math.random(),
+                msgID: Date.now() + Math.floor(Math.random() * 1000),
+                messageType: messageType,
                 senderAccount: isAdminLoggedIn ? "admin" : acc.accountNumber,
-                text: text.trim(),
+                content:
+                  messageType === "message" ? text.trim() : Number(loanAmount),
+                loanStatus:
+                  messageType === "loanAppliance" ? "Awaiting approval" : null,
+              },
+            ],
+          };
+        }
+        return acc;
+      });
+    });
+  };
+
+  const approveLoan = (accountNumber, msgID) => {
+    setAccounts((prevAccounts) => {
+      return prevAccounts.map((acc) => {
+        if (acc.accountNumber === accountNumber) {
+          let loanAmount;
+
+          const newChatHistory = acc.chatHistory.map((row) => {
+            if (row.msgID === msgID) {
+              loanAmount = Number(row.content);
+              return {
+                ...row,
+                loanStatus: "Approved",
+              };
+            }
+            return row;
+          });
+          return {
+            ...acc,
+            balance: acc.balance + loanAmount,
+            history: [...acc.history, `Loaned ${loanAmount} from the bank`],
+            chatHistory: newChatHistory,
+            loans: [
+              ...acc.loans,
+              {
+                loanID: Date.now() + Math.floor(Math.random() * 1000),
+                loanAmount: loanAmount,
               },
             ],
           };
@@ -229,6 +279,7 @@ function BankProvider({ children }) {
     deleteAccount,
     showDetails,
     sendMessage,
+    approveLoan,
   };
 
   return (

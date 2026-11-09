@@ -12,7 +12,8 @@
   "dependencies": {
     "jspdf": "^4.2.1",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "sweetalert2": "^11.26.25"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
