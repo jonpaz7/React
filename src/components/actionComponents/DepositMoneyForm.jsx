@@ -1,8 +1,8 @@
-import { useState, useContext } from "react";
-import { BankActionsContext } from "../../context/BankContext";
+import { useState } from "react";
+import { useBankActions } from "../../context/BankContext";
 
 function DepositMoneyForm({ closeForm }) {
-  const { depositMoney } = useContext(BankActionsContext);
+  const { depositMoney } = useBankActions();
 
   const [formData, setFormData] = useState({
     amountToDeposit: "",
@@ -18,33 +18,27 @@ function DepositMoneyForm({ closeForm }) {
   };
 
   return (
-    <>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          depositMoney(formData);
-          closeForm();
-        }}
-      >
-        <h1>deposit</h1>
-        <button
-          onClick={() => {
-            closeForm();
-          }}
-        >
-          &times;
-        </button>
-        <input
-          type="number"
-          name="amountToDeposit"
-          placeholder="600 NIS"
-          value={formData.amountToDeposit}
-          onChange={(event) => handleChange(event)}
-        />
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        depositMoney(formData);
+        closeForm();
+      }}
+    >
+      <h1>deposit</h1>
+      <button type="button" onClick={closeForm}>
+        &times;
+      </button>
+      <input
+        type="number"
+        name="amountToDeposit"
+        placeholder="600 NIS"
+        value={formData.amountToDeposit}
+        onChange={(event) => handleChange(event)}
+      />
 
-        <button type="submit">Deposit</button>
-      </form>
-    </>
+      <button type="submit">Deposit</button>
+    </form>
   );
 }
 

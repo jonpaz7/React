@@ -1,180 +1,67 @@
-import { useContext, useState, useEffect } from "react";
-import { BankDataContext, BankActionsContext } from "../context/BankContext";
+import { useState } from "react";
+import { useBankData, useBankActions } from "../context/BankContext";
 
 function Chat() {
-  const { getAccountObject, sendMessage } = useContext(BankActionsContext);
-  const { loggedInAccountNumber, accounts, isAdminLoggedIn } =
-    useContext(BankDataContext);
+  const { sendMessage } = useBankActions();
+  const { accounts, currentUser, isAdminLoggedIn } = useBankData();
 
-  const [loggedInAccount, setLoggedInAccount] = useState(null);
   const [message, setMessage] = useState("");
-  const [chosedAcc, setChosedAcc] = useState(null);
-  const [chosedAccNumber, setChosedAccNumber] = useState(null);
+  const [selectedAccountNumber, setSelectedAccountNumber] = useState(null);
 
-  useEffect(() => {
-    if (loggedInAccountNumber || accounts) {
-      setLoggedInAccount(getAccountObject(loggedInAccountNumber));
-    }
-  }, [loggedInAccountNumber, accounts]);
+  const activeChatAccount = isAdminLoggedIn
+    ? accounts.find((acc) => acc.accountNumber === selectedAccountNumber) || null
+    : currentUser;
 
-  useEffect(() => {
-    if (chosedAccNumber) {
-      setChosedAcc(getAccountObject(chosedAccNumber));
-    } else {
-      setChosedAcc(null);
-    }
-  }, [chosedAccNumber, accounts]);
+  const handleSend = () => {
+    if (!message.trim() || !activeChatAccount) return;
+    sendMessage(message, activeChatAccount.accountNumber);
+    setMessage("");
+  };
+
+  if (!currentUser) return null;
 
   return (
-    <>
-      {/* Admin view*/}
-      {isAdminLoggedIn && (
+    <div
+      style={{
+        position: "fixed",
+        bottom: "20px",
+        left: "20px",
+        width: "320px",
+        height: "200px",
+        backgroundColor: "#ffffff",
+        borderRadius: "12px",
+        boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.15)",
+        zIndex: 1000,
+        border: "1px solid #e0e0e0",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      <p style={{ margin: "5px 10px", fontWeight: "bold" }}>Chat</p>
+
+      {isAdminLoggedIn && !activeChatAccount ? (
         <div
           style={{
-            position: "fixed",
-            bottom: "20px",
-            left: "20px",
-            width: "320px",
-            height: "200px",
-            backgroundColor: "#ffffff",
-            borderRadius: "12px",
-            boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.15)",
-            zIndex: 1000, //
-            border: "1px solid #e0e0e0",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
+            height: "100%",
+            overflowY: "auto",
+            border: "1px solid black",
+            padding: "10px",
           }}
         >
-          <p>Chat</p>
-          {/*Main screen*/}
-          {!chosedAcc && (
-            <div
-              style={{
-                height: "100%",
-                overflowY: "auto",
-                border: "1px solid black",
-                padding: "10px",
-              }}
-            >
-              {/*Display the accs list with button to chat with them*/}
-              {accounts.map((acc) => {
-                return (
-                  <div key={acc.accountNumber}>
-                    <p>
-                      {acc.accountNumber} {acc.ownerName}
-                    </p>
-                    <button
-                      onClick={() => setChosedAccNumber(acc.accountNumber)}
-                    >
-                      Chat
-                    </button>
-                  </div>
-                );
-              })}
+          {accounts.map((acc) => (
+            <div key={acc.accountNumber} style={{ marginBottom: "6px" }}>
+              <p style={{ margin: "2px 0" }}>
+                {acc.accountNumber} {acc.ownerName}
+              </p>
+              <button onClick={() => setSelectedAccountNumber(acc.accountNumber)}>
+                Chat
+              </button>
             </div>
-          )}
-
-          {/*Chat screen*/}
-          {chosedAcc && (
-            <>
-              <div
-                style={{
-                  height: "130px",
-                  overflowY: "auto",
-                  border: "1px solid black",
-                  padding: "10px",
-                }}
-              >
-                {chosedAcc.chatHistory?.map((row) => {
-                  if (row.senderAccount !== "admin") {
-                    return (
-                      <p
-                        key={row.msgID}
-                        style={{
-                          textAlign: "left",
-                          backgroundColor: "#E7F3FF",
-                          width: "fit-content",
-                          padding: "2px",
-                          margin: "2px",
-                          borderRadius: "5px",
-                        }}
-                      >
-                        {chosedAcc.ownerName}: "{row.text}"
-                      </p>
-                    );
-                  } else {
-                    return (
-                      <p
-                        key={row.msgID}
-                        style={{
-                          textAlign: "right",
-                          backgroundColor: "#DCF8C6",
-                          width: "fit-content",
-                          padding: "2px",
-                          margin: "2px 2px 2px auto",
-                          borderRadius: "5px",
-                        }}
-                      >
-                        Admin: "{row.text}"
-                      </p>
-                    );
-                  }
-                })}
-              </div>
-
-              <div
-                style={{ position: "absolute", bottom: "0px", width: "100%" }}
-              >
-                <input
-                  type="text"
-                  placeholder="Message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                />
-                <button
-                  onClick={() => {
-                    console.log(message, chosedAcc.accountNumber);
-                    sendMessage(message, chosedAcc.accountNumber);
-                  }}
-                >
-                  Send
-                </button>
-
-                <button
-                  onClick={() => {
-                    setChosedAccNumber(null);
-                  }}
-                >
-                  X
-                </button>
-              </div>
-            </>
-          )}
+          ))}
         </div>
-      )}
-
-      {/*User view */}
-      {!isAdminLoggedIn && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: "20px",
-            width: "320px",
-            height: "200px",
-            backgroundColor: "#ffffff",
-            borderRadius: "12px",
-            boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.15)",
-            zIndex: 1000, //
-            border: "1px solid #e0e0e0",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          <p>Chat</p>
-
+      ) : (
+        <>
           <div
             style={{
               height: "130px",
@@ -183,62 +70,45 @@ function Chat() {
               padding: "10px",
             }}
           >
-            {loggedInAccount &&
-              loggedInAccount.chatHistory.map((row) => {
-                if (row.senderAccount !== "admin") {
-                  return (
-                    <p
-                      key={row.msgID}
-                      style={{
-                        textAlign: "left",
-                        backgroundColor: "#E7F3FF",
-                        width: "fit-content",
-                        padding: "2px",
-                        margin: "2px",
-                        borderRadius: "5px",
-                      }}
-                    >
-                      {loggedInAccount.ownerName}: "{row.text}"
-                    </p>
-                  );
-                } else {
-                  return (
-                    <p
-                      key={row.msgID}
-                      style={{
-                        textAlign: "right",
-                        backgroundColor: "#DCF8C6",
-                        width: "fit-content",
-                        padding: "2px",
-                        margin: "2px 2px 2px auto",
-                        borderRadius: "5px",
-                      }}
-                    >
-                      Admin: "{row.text}"
-                    </p>
-                  );
-                }
-              })}
+            {activeChatAccount?.chatHistory?.map((row) => {
+              const isAdminMsg = row.senderAccount === "admin";
+              return (
+                <p
+                  key={row.msgID}
+                  style={{
+                    textAlign: isAdminMsg ? "right" : "left",
+                    backgroundColor: isAdminMsg ? "#DCF8C6" : "#E7F3FF",
+                    width: "fit-content",
+                    padding: "2px 6px",
+                    margin: isAdminMsg ? "2px 2px 2px auto" : "2px",
+                    borderRadius: "5px",
+                  }}
+                >
+                  {isAdminMsg ? "Admin" : activeChatAccount.ownerName}: "{row.text}"
+                </p>
+              );
+            })}
           </div>
 
           <div style={{ position: "absolute", bottom: "0px", width: "100%" }}>
             <input
               type="text"
-              placeholder="i need help"
+              placeholder={isAdminLoggedIn ? "Message" : "i need help"}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSend();
+              }}
             />
-            <button
-              onClick={() =>
-                sendMessage(message, loggedInAccount.accountNumber)
-              }
-            >
-              Send
-            </button>
+            <button onClick={handleSend}>Send</button>
+
+            {isAdminLoggedIn && (
+              <button onClick={() => setSelectedAccountNumber(null)}>X</button>
+            )}
           </div>
-        </div>
+        </>
       )}
-    </>
+    </div>
   );
 }
 

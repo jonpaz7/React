@@ -1,8 +1,8 @@
-import { useContext, useState } from "react";
-import { BankActionsContext } from "../context/BankContext";
+import { useState } from "react";
+import { useBankActions } from "../context/BankContext";
 
 function CreatingAccount() {
-  const { createAccount } = useContext(BankActionsContext);
+  const { createAccount } = useBankActions();
 
   const [formData, setFormData] = useState({
     ownerName: "",

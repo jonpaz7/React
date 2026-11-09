@@ -1,8 +1,8 @@
-import { useContext, useState } from "react";
-import { BankActionsContext } from "../context/BankContext";
+import { useState } from "react";
+import { useBankActions } from "../context/BankContext";
 
 function LoginAccountScreen() {
-  const { loginAccount } = useContext(BankActionsContext);
+  const { loginAccount } = useBankActions();
 
   const [formData, setFormData] = useState({
     ownerID: "",
@@ -17,6 +17,7 @@ function LoginAccountScreen() {
       [name]: value,
     }));
   };
+
   return (
     <>
       <h3>Login to Existing Account</h3>

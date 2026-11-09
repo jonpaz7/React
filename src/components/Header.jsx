@@ -1,16 +1,27 @@
+import { useEffect, useState } from "react";
 import getUSDRate from "../utils/getUSDRate.js";
 
 function Header() {
-  let USDRate = getUSDRate();
+  const [usdRate, setUsdRate] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    getUSDRate()
+      .then((rate) => {
+        if (isMounted) setUsdRate(rate);
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
-    <>
+    <header>
       <h1>Bank Account</h1>
-
-      {/*<div>
-        <h4>USD Rate: {USDRate}</h4>
-      </div>*/}
-    </>
+      {usdRate && <h4>USD Rate: {usdRate} ILS</h4>}
+    </header>
   );
 }
 

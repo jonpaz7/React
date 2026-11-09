@@ -1,37 +1,27 @@
-import { useContext, useEffect, useState } from "react";
-import { BankActionsContext, BankDataContext } from "../context/BankContext";
+import { useBankData, useBankActions } from "../context/BankContext";
 
 function AccountStatus() {
-  const { getAccountObject, logout } = useContext(BankActionsContext);
-  const { loggedInAccountNumber, accounts } = useContext(BankDataContext);
-  let [loggedInAccount, setLoggedInAccount] = useState(null);
+  const { logout } = useBankActions();
+  const { currentUser } = useBankData();
 
-  useEffect(() => {
-    if (loggedInAccountNumber || accounts) {
-      setLoggedInAccount(getAccountObject(loggedInAccountNumber));
-    }
-  }, [loggedInAccountNumber, accounts]);
-
-  if (!loggedInAccount) {
-    return;
+  if (!currentUser) {
+    return null;
   }
 
   return (
-    <>
-      <div>
-        <h2>
-          hello {loggedInAccount.isAdmin === true && <strong>Manager</strong>}{" "}
-          {loggedInAccount.ownerName}{" "}
-        </h2>
+    <div>
+      <h2>
+        hello {currentUser.isAdmin && <strong>Manager</strong>}{" "}
+        {currentUser.ownerName}
+      </h2>
 
-        <p>Account Number: {loggedInAccount.accountNumber}</p>
-        <p>Owner Name: {loggedInAccount.ownerName}</p>
-        <p>Owner ID: {loggedInAccount.ownerID}</p>
-        <p>Balance: {loggedInAccount.balance}</p>
+      <p>Account Number: {currentUser.accountNumber}</p>
+      <p>Owner Name: {currentUser.ownerName}</p>
+      <p>Owner ID: {currentUser.ownerID}</p>
+      <p>Balance: {currentUser.balance}</p>
 
-        <button onClick={logout}>Logout</button>
-      </div>
-    </>
+      <button onClick={logout}>Logout</button>
+    </div>
   );
 }
 

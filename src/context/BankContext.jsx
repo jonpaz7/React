@@ -1,18 +1,16 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { getRandomAccountNumber } from "../utils/numericUtils.js";
 
 function BankProvider({ children }) {
-  //================================ Data =====================================//
-
   const [accounts, setAccounts] = useState(() => loadAccounts());
-
   const [loggedInAccountNumber, setLoggedInAccountNumber] = useState(null);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  //================================ Functions =====================================//
+
+  const currentUser =
+    accounts.find((acc) => acc.accountNumber === loggedInAccountNumber) || null;
+  const isAdminLoggedIn = Boolean(currentUser?.isAdmin);
 
   function loadAccounts() {
     const savedAccounts = localStorage.getItem("bankAccounts");
-
     return savedAccounts && savedAccounts !== "undefined"
       ? JSON.parse(savedAccounts)
       : [];
@@ -22,37 +20,19 @@ function BankProvider({ children }) {
     localStorage.setItem("bankAccounts", JSON.stringify(accounts));
   }, [accounts]);
 
-  useEffect(() => {
-    if (
-      loggedInAccountNumber &&
-      accounts.find((acc) => acc.accountNumber === loggedInAccountNumber)
-        .isAdmin === true
-    ) {
-      setIsAdminLoggedIn(true);
-    } else {
-      setIsAdminLoggedIn(false);
-    }
-  }, [loggedInAccountNumber]);
-
   const logout = () => {
     setLoggedInAccountNumber(null);
-  };
-
-  const getAccountObject = (accountNumber) => {
-    const found = accounts.find((acc) => acc.accountNumber === accountNumber);
-    return found;
   };
 
   const createAccount = (formData) => {
     const { ownerName, ownerID, ownerPassword, isAdmin } = formData;
 
-    //check for missing details
     if (!ownerName || !ownerID || !ownerPassword) {
       alert("missing details");
       return;
     }
 
-    const selectedAccount = accounts.find((x) => x.ownerID === ownerID);
+    const selectedAccount = accounts.find((x) => String(x.ownerID) === String(ownerID));
 
     if (selectedAccount) {
       alert("there is already account with this ID");
@@ -81,7 +61,7 @@ function BankProvider({ children }) {
       return;
     }
 
-    const selectedAccount = accounts.find((x) => x.ownerID == ownerID);
+    const selectedAccount = accounts.find((x) => String(x.ownerID) === String(ownerID));
 
     if (!selectedAccount) {
       alert("No such Account");
@@ -90,18 +70,10 @@ function BankProvider({ children }) {
 
     if (selectedAccount.ownerPassword === ownerPassword) {
       setLoggedInAccountNumber(selectedAccount.accountNumber);
-
       alert("Successfully Login");
     } else {
       alert("Check your Password");
     }
-  };
-
-  const loggedInCheck = () => {
-    if (!loggedInAccountNumber) {
-      return false;
-    }
-    return true;
   };
 
   const depositMoney = (formData) => {
@@ -136,7 +108,7 @@ function BankProvider({ children }) {
             alert("You dont have enough money in your account");
             return acc;
           } else {
-            acc = {
+            return {
               ...acc,
               balance: acc.balance - amountToWithdraw,
               history: [...acc.history, `Withdrawn ${amountToWithdraw} NIS`],
@@ -153,7 +125,7 @@ function BankProvider({ children }) {
 
     amountToTransfer = Number(amountToTransfer);
     targetAccountNumber = Number(targetAccountNumber);
-    if (isNaN(amountToTransfer) || isNaN(targetAccountNumber)) return;
+    if (isNaN(amountToTransfer) || isNaN(targetAccountNumber) || amountToTransfer <= 0) return;
 
     if (!accounts.find((acc) => acc.accountNumber === targetAccountNumber)) {
       alert("couldnt find the target account");
@@ -162,8 +134,7 @@ function BankProvider({ children }) {
       alert("hey man u cant transfer money to ur self");
       return;
     } else if (
-      accounts.find((acc) => acc.accountNumber === loggedInAccountNumber)
-        .balance < amountToTransfer
+      accounts.find((acc) => acc.accountNumber === loggedInAccountNumber).balance < amountToTransfer
     ) {
       alert("not enough money sir!");
       return;
@@ -201,14 +172,14 @@ function BankProvider({ children }) {
   const deleteAccount = (accountNumberToDelete) => {
     setAccounts((prevAccounts) => {
       return prevAccounts.filter(
-        (acc) => acc.accountNumber != accountNumberToDelete,
+        (acc) => acc.accountNumber !== accountNumberToDelete
       );
     });
   };
 
   const showDetails = (accountNumberToBeShown) => {
     const accountToBeShown = accounts.find(
-      (acc) => acc.accountNumber === accountNumberToBeShown,
+      (acc) => acc.accountNumber === accountNumberToBeShown
     );
 
     let historyTextList = "";
@@ -222,42 +193,38 @@ function BankProvider({ children }) {
     Balance: ${accountToBeShown.balance}
     
     History: ${historyTextList}
-
-      `);
+    `);
   };
 
-  const sendMessage = (text, senderAccountNumber) => {
+  const sendMessage = (text, targetAccountNumber) => {
+    if (!text || !text.trim()) return;
+
     setAccounts((prevAccounts) => {
       return prevAccounts.map((acc) => {
-        if (acc.accountNumber === senderAccountNumber) {
-          return (acc = {
+        if (acc.accountNumber === targetAccountNumber) {
+          return {
             ...acc,
-
             chatHistory: [
               ...acc.chatHistory,
               {
+                msgID: Date.now() + Math.random(),
                 senderAccount: isAdminLoggedIn ? "admin" : acc.accountNumber,
-                text: text,
+                text: text.trim(),
               },
             ],
-          });
+          };
         }
         return acc;
       });
     });
   };
 
-  //================================ Configuration =====================================//
-
   const BankActions = {
-    loadAccounts,
     logout,
     createAccount,
     loginAccount,
-    loggedInCheck,
     depositMoney,
     withdrawMoney,
-    getAccountObject,
     transferMoney,
     deleteAccount,
     showDetails,
@@ -267,14 +234,36 @@ function BankProvider({ children }) {
   return (
     <BankActionsContext.Provider value={BankActions}>
       <BankDataContext.Provider
-        value={{ accounts, loggedInAccountNumber, isAdminLoggedIn }}
+        value={{
+          accounts,
+          loggedInAccountNumber,
+          currentUser,
+          isAdminLoggedIn,
+        }}
       >
         {children}
       </BankDataContext.Provider>
     </BankActionsContext.Provider>
   );
 }
+
 export const BankActionsContext = createContext(null);
 export const BankDataContext = createContext(null);
+
+export const useBankData = () => {
+  const context = useContext(BankDataContext);
+  if (!context) {
+    throw new Error("useBankData must be used within a BankProvider");
+  }
+  return context;
+};
+
+export const useBankActions = () => {
+  const context = useContext(BankActionsContext);
+  if (!context) {
+    throw new Error("useBankActions must be used within a BankProvider");
+  }
+  return context;
+};
 
 export default BankProvider;

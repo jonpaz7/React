@@ -1,27 +1,26 @@
-import { useContext, useState } from "react";
-import { BankDataContext, BankActionsContext } from "../context/BankContext";
-import PrintAsPDF from "./buttonComponents.jsx/PrintAsPDF";
+import { useState } from "react";
+import { useBankData, useBankActions } from "../context/BankContext";
+import PrintAsPDF from "./buttonComponents/PrintAsPDF";
 
 function AccountsList() {
-  const { accounts } = useContext(BankDataContext);
-  const { deleteAccount, showDetails } = useContext(BankActionsContext);
+  const { accounts } = useBankData();
+  const { deleteAccount, showDetails } = useBankActions();
 
   const [showList, setShowList] = useState(true);
   const [ownerNameSearchTerm, setOwnerNameSearchTerm] = useState("");
   const [balanceSearchTerm, setBalanceSearchTerm] = useState("");
 
+  const handleRefresh = () => {
+    setOwnerNameSearchTerm("");
+    setBalanceSearchTerm("");
+    setShowList(true);
+  };
+
   return (
     <>
       <h2>Accounts List</h2>
       <div>
-        <button
-          onClick={() => {
-            setShowList(false);
-            setShowList(true);
-          }}
-        >
-          Refresh
-        </button>
+        <button onClick={handleRefresh}>Refresh</button>
         <button onClick={() => setShowList(false)}>Clear List</button>
       </div>
       <div>
@@ -52,7 +51,6 @@ function AccountsList() {
               acc.balance > balanceSearchTerm
             );
           })
-
           .map((acc) => {
             return (
               <div key={acc.accountNumber}>
@@ -71,4 +69,5 @@ function AccountsList() {
     </>
   );
 }
+
 export default AccountsList;

@@ -1,8 +1,8 @@
-import { useState, useContext } from "react";
-import { BankActionsContext } from "../../context/BankContext";
+import { useState } from "react";
+import { useBankActions } from "../../context/BankContext";
 
-function WithrawMoneyForm({ closeForm }) {
-  const { withdrawMoney } = useContext(BankActionsContext);
+function WithdrawMoneyForm({ closeForm }) {
+  const { withdrawMoney } = useBankActions();
 
   const [formData, setFormData] = useState({
     amountToWithdraw: "",
@@ -18,34 +18,28 @@ function WithrawMoneyForm({ closeForm }) {
   };
 
   return (
-    <>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          withdrawMoney(formData);
-          closeForm();
-        }}
-      >
-        <h1>Withraw</h1>
-        <button
-          onClick={() => {
-            closeForm();
-          }}
-        >
-          &times;
-        </button>
-        <input
-          type="number"
-          name="amountToWithdraw"
-          placeholder="600 NIS"
-          value={formData.amountToWithdraw}
-          onChange={(event) => handleChange(event)}
-        />
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        withdrawMoney(formData);
+        closeForm();
+      }}
+    >
+      <h1>Withdraw</h1>
+      <button type="button" onClick={closeForm}>
+        &times;
+      </button>
+      <input
+        type="number"
+        name="amountToWithdraw"
+        placeholder="600 NIS"
+        value={formData.amountToWithdraw}
+        onChange={(event) => handleChange(event)}
+      />
 
-        <button type="submit">Withdraw</button>
-      </form>
-    </>
+      <button type="submit">Withdraw</button>
+    </form>
   );
 }
 
-export default WithrawMoneyForm;
+export default WithdrawMoneyForm;
